@@ -7,8 +7,10 @@ import shutil
 import json
 import re
 import torch
+import sys
 import datetime
 import nltk
+from transformers import GenerationConfig
 import evaluate
 import shutil
 from transformers import T5Tokenizer, DataCollatorForSeq2Seq, TFMT5ForConditionalGeneration, MT5Tokenizer, \
@@ -30,9 +32,6 @@ config = {
 }
 nlp.add_pipe("timexy", config=config, before="ner")
 
-from datetime import datetime
-
-import sys
 class Interface:
     def __init__(self):
         for path in sys.path:
@@ -43,7 +42,7 @@ class Interface:
         self.f = open(self.file_name, 'w')
         self.f.write('Generate: ')
         self.f.close()
-
+        self.gen_file = generation_config = GenerationConfig.from_pretrained("../generation_config.json")
         self.f = open(self.file_name, 'r+')
         self.f.seek(0, 2)
         self.model = T5ForConditionalGeneration.from_pretrained("/Users/rachitsandeepjain/PycharmProjects/temporal_chatbot_backend/api/api/bot_model/model")
@@ -76,7 +75,7 @@ class Interface:
         self.f.seek(0)
         mod_input = self.f.read() + '\n'
         inputs = self.tokenizer(mod_input, return_tensors="pt")
-        outputs = self.model.generate(**inputs)
+        outputs = self.model.generate(**inputs,generation_config=self.gen_file)
 
         # Decode the output tokens to text
         model_result = self.tokenizer.decode(outputs[0], skip_special_tokens=True)

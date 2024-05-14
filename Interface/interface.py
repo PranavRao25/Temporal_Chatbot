@@ -1,12 +1,13 @@
 from imports import *
 
+
 class Interface:
     def __init__(self):
         self.file_name = f"./temp_files/temp_{datetime.now()}.txt"
         self.f = open(self.file_name, 'w')
         self.f.write('Generate: ')
         self.f.close()
-
+        self.gen_file = generation_config = GenerationConfig.from_pretrained("../generation_config.json")
         self.f = open(self.file_name, 'r+')
         self.model = T5ForConditionalGeneration.from_pretrained("../savepoints_2024-04-21 20:23:55.826915/model")
         self.tokenizer = T5Tokenizer.from_pretrained("../savepoints_2024-04-21 20:23:55.826915/tokenizer")
@@ -18,10 +19,10 @@ class Interface:
         else:
             print("The file does not exist")
 
-    def printTranscript(self):
+    def printTranscript(self, file_name=''):
         self.f.close()
 
-        news = f"./printed_files/Conversation_{datetime.now()}.txt"
+        news = f"./printed_files/Conversation_{datetime.now()}.txt" if (file_name == '') else file_name
         file = open(news, 'w')
         file.close()
 
@@ -29,14 +30,14 @@ class Interface:
         self.f = open(self.file_name, 'r+')
 
     def userInput(self, inputLine):
-        input = inputLine + '\n'
-        self.f.write(input)
+        input1 = inputLine + '\n'
+        self.f.write(input1)
 
         # Tokenize the text and generate output
         self.f.seek(0)
         mod_input = self.f.read() + '\n'
         inputs = self.tokenizer(mod_input, return_tensors="pt")
-        outputs = self.model.generate(**inputs)
+        outputs = self.model.generate(**inputs,generation_config=self.gen_file)
 
         # Decode the output tokens to text
         model_result = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -45,8 +46,7 @@ class Interface:
 
     def displayTranscript(self):
         self.f.seek(0)
-        l = self.f.readlines()
-        for i in l:
+        for i in self.f.readlines():
             print(i)
 
     def clearTranscript(self):
