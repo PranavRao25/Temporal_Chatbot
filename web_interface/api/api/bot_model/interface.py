@@ -4,6 +4,7 @@ import numpy.random
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import spacy
 import shutil
+# import timm
 import json
 import re
 import torch
@@ -32,12 +33,13 @@ config = {
 }
 nlp.add_pipe("timexy", config=config, before="ner")
 
+
 class Interface:
     def __init__(self):
         for path in sys.path:
             print(path)
         self.num = numpy.random.random()
-        self.file_name = f"/Users/rachitsandeepjain/PycharmProjects/temporal_chatbot_backend/api/api/bot_model/temp_files/temp_{numpy.random.random()}.txt"
+        self.file_name = f"/home/pranav/Projects/OELP_Sem6/Temporal_Chatbot/web_interface/api/api/bot_model/temp_files/temp_{numpy.random.random()}.txt"
         print("pranav", self.file_name)
         self.f = open(self.file_name, 'w')
         self.f.write('Generate: ')
@@ -45,8 +47,15 @@ class Interface:
         self.gen_file = generation_config = GenerationConfig.from_pretrained("../generation_config.json")
         self.f = open(self.file_name, 'r+')
         self.f.seek(0, 2)
-        self.model = T5ForConditionalGeneration.from_pretrained("/Users/rachitsandeepjain/PycharmProjects/temporal_chatbot_backend/api/api/bot_model/model")
-        self.tokenizer = T5Tokenizer.from_pretrained("/Users/rachitsandeepjain/PycharmProjects/temporal_chatbot_backend/api/api/bot_model/tokenizer")
+
+        # self.model = T5ForConditionalGeneration.from_pretrained("/Users/rachitsandeepjain/PycharmProjects/temporal_chatbot_backend/api/api/bot_model/model")
+        # self.tokenizer = T5Tokenizer.from_pretrained("/Users/rachitsandeepjain/PycharmProjects/temporal_chatbot_backend/api/api/bot_model/tokenizer")
+
+        self.model = T5ForConditionalGeneration.from_pretrained('hf_hub:kronos25/Temporal_Chatbot/model')
+        self.tokenizer = T5Tokenizer.from_pretrained('hf_hub:kronos25/Temporal_Chatbot/tokenizer')
+
+        # self.model = timm.create_model('hf_hub:kronos25/Temporal_Chatbot/model', pretrained=True)
+        # self.tokenizer = timm.create_model('hf_hub:kronos25/Temporal_Chatbot/tokenizer')
 
     def closeInterface(self):
         self.f.close()
@@ -60,7 +69,7 @@ class Interface:
     def printTranscript(self):
         self.f.close()
 
-        news = f"/Users/rachitsandeepjain/PycharmProjects/temporal_chatbot_backend/api/api/bot_model/printed_files/Conversation_{numpy.random.random()}.txt"
+        news = f"/home/pranav/Projects/OELP_Sem6/Temporal_Chatbot/web_interface/api/api/bot_model/printed_files/Conversation_{numpy.random.random()}.txt"
         file = open(news, 'w')
         file.close()
 
@@ -81,7 +90,7 @@ class Interface:
         model_result = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         result = model_result + '\n'
         self.f.write(result)
-        self.f.seek(0,2)
+        self.f.seek(0, 2)
         return result
 
     def displayTranscript(self):
